@@ -11,9 +11,8 @@ def test_train_model_returns_fitted_pipeline():
     df = load_data("data/telco_churn.csv")
 
     X, y = preprocess(df)
-    X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    model = train_model(X_train, y_train, 'random_forest', {'n_estimators': 200, 'max_depth': 10, 'random_state': 42, 'n_jobs': -1})
+    model = train_model(X, y, 'random_forest', {'n_estimators': 200, 'max_depth': 10, 'random_state': 42, 'n_jobs': -1})
 
     assert isinstance(model, Pipeline)
 
@@ -31,9 +30,9 @@ def test_compute_metrics_returns_expected_keys():
     df = load_data("data/telco_churn_test.csv")
 
     X, y = preprocess(df)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    model = train_model(X_train, y_train, 'random_forest', {'n_estimators': 200, 'max_depth': 10, 'random_state': 42, 'n_jobs': -1})
+    model = train_model(X, y, 'random_forest', {'n_estimators': 200, 'max_depth': 10, 'random_state': 42, 'n_jobs': -1})
 
     metrics = compute_metrics(model, X_test, y_test)
 

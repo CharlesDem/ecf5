@@ -1,31 +1,25 @@
+import os
+
+from dotenv import load_dotenv
+import mlflow
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.base import BaseEstimator
+from mlflow.models import infer_signature
+from churnguard.evaluate import compute_metrics
 
-def train_model(X_train, y_train, model_name: str, params: dict) -> Pipeline:
+load_dotenv()
+
+def train_model(X, y, model_name: str, params: dict) -> Pipeline:
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     num_cols = ['tenure', 'MonthlyCharges', 'TotalCharges', 'SeniorCitizen']
-
-    cat_cols = [ # pas repris la boucle car je ne veux pas de X dans les params pour ne pas avoir à faire le split deux fois
-        "gender",
-        "Partner",
-        "Dependents",
-        "PhoneService",
-        "MultipleLines",
-        "InternetService",
-        "OnlineSecurity",
-        "OnlineBackup",
-        "DeviceProtection",
-        "TechSupport",
-        "StreamingTV",
-        "StreamingMovies",
-        "Contract",
-        "PaperlessBilling",
-        "PaymentMethod",
-    ]
+    cat_cols = [c for c in X.columns if c not in num_cols]
 
     preprocess = ColumnTransformer([
         ('num', StandardScaler(), num_cols),
@@ -37,7 +31,36 @@ def train_model(X_train, y_train, model_name: str, params: dict) -> Pipeline:
         ('model', __set_model(model_name, params)),
     ])
 
-    model.fit(X_train, y_train)
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
+    mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "default"))
+
+    with mlflow.start_run(run_name=model_name):
+        
+        mlflow.log_param("model_name", model_name)
+        mlflow.log_param("test_size", 0.2)
+        mlflow.log_param("split_random_state", 42)
+        mlflow.log_params(params)
+
+        model.fit(X_train, y_train)
+
+        metrics = compute_metrics(model, X_test, y_test)
+
+        mlflow.log_metrics(metrics)
+
+        input_example = X_train.head(1)
+
+        signature = infer_signature(
+            input_example,
+            model.predict(input_example),
+        )
+
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            name="model",
+            signature=signature,
+            input_example=input_example,
+        )
+
     return model
 
 def __set_model(model_name: str, params: dict) -> BaseEstimator:
