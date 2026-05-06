@@ -1,0 +1,5 @@
+fastapi>=0.110
+pydantic>=2.0
+uvicorn>=0.27
+mlflow-skinny>=2.10
+python-dotenv>=1.0

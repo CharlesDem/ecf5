@@ -1,7 +1,6 @@
 import os
 
 import mlflow
-import pandas as pd
 from dotenv import load_dotenv
 
 from exceptions import ModelNotLoadedError
@@ -33,6 +32,8 @@ class PredictionService:
     def predict_batch(self, customers: list[CustomerFeatures]) -> list[PredictionResponse]:
         if self.model is None:
             raise ModelNotLoadedError()
+
+        import pandas as pd
 
         df = pd.DataFrame([customer.model_dump() for customer in customers])
 
