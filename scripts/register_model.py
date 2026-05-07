@@ -10,17 +10,17 @@ runs = {
         "random_state": 42,
     },
     "random_forest": {
-        "n_estimators":200, 
-        "max_depth": 10, 
-        "random_state": 42, 
-        "n_jobs": -1
+        "n_estimators": 200,
+        "max_depth": 10,
+        "random_state": 42,
+        "n_jobs": -1,
     },
     "gradient_boosting": {
         "n_estimators": 200,
         "learning_rate": 0.1,
         "max_depth": 3,
         "random_state": 42,
-    }
+    },
 }
 
 
@@ -28,7 +28,7 @@ print("Download du dataset Telco")
 download()
 
 print("Chargement des données dans data")
-df_to_test = load_data('data/telco_churn.csv')
+df_to_test = load_data("data/telco_churn.csv")
 
 print("Preprocessing")
 X, y = preprocess(df_to_test)
@@ -44,4 +44,3 @@ promotion_to_laprod()
 
 
 print("Done")
-

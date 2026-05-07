@@ -21,7 +21,7 @@ class CustomerFeatures(BaseModel):
     OnlineSecurity: Literal["No", "Yes", "No internet service"]
     OnlineBackup: Literal["No", "Yes", "No internet service"]
     DeviceProtection: Literal["No", "Yes", "No internet service"]
-    TechSupport: Literal["No", "Yes", "No internet service"]  
+    TechSupport: Literal["No", "Yes", "No internet service"]
     StreamingTV: Literal["No", "Yes", "No internet service"]
     StreamingMovies: Literal["No", "Yes", "No internet service"]
     Contract: Literal["Month-to-month", "One year", "Two year"]
