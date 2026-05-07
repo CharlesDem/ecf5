@@ -6,7 +6,7 @@ from churnguard.data import load_data, preprocess
 
 
 TEST_DIR = Path(__file__).parent
-TEST_DATA_PATH = TEST_DIR / "data" / "telco_crn_test.csv"
+TEST_DATA_PATH = TEST_DIR / "data" / "telco_churn_test.csv"
 
 
 def test_test_data_file_exists():
