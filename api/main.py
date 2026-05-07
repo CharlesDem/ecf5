@@ -1,10 +1,7 @@
-import asyncio
 from contextlib import asynccontextmanager
-
 import uvicorn
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-
 from controller import router
 from error_handler import model_not_loaded_exception_handler, validation_exception_handler
 from exceptions import ModelNotLoadedError
