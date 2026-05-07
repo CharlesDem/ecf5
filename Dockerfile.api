@@ -1,27 +1,3 @@
-# FROM python:3.11-slim-bookworm
-
-# WORKDIR /app/api
-
-# ENV PYTHONDONTWRITEBYTECODE=1
-# ENV PYTHONUNBUFFERED=1
-# ENV PYTHONPATH=/app:/app/api
-
-# COPY requirements-api.txt /tmp/requirements-api.txt
-
-# RUN pip install --no-cache-dir --upgrade pip wheel setuptools==70.0.0 \
-#     && pip install --no-cache-dir -r /tmp/requirements-api.txt \
-#     && python -c "import pkg_resources; print('pkg_resources ok')" \
-#     && python -c "import mlflow; print('mlflow ok')"
-
-# COPY api/ /app/api/
-
-# RUN adduser --disabled-password --gecos "" appuser
-# USER appuser
-
-# EXPOSE 8000
-
-# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
 FROM python:3.11-slim-bookworm AS builder
 
 ENV VIRTUAL_ENV=/opt/venv
@@ -33,7 +9,7 @@ RUN python -m venv "$VIRTUAL_ENV"
 
 COPY requirements-api.txt .
 
-RUN pip install --no-cache-dir --upgrade pip wheel setuptools==70.0.0 \
+RUN pip install --no-cache-dir --upgrade pip setuptools==82.0.1 \
     && pip install --no-cache-dir --no-compile -r requirements-api.txt \
     && find "$VIRTUAL_ENV" -type d -name "__pycache__" -prune -exec rm -rf {} + \
     && find "$VIRTUAL_ENV" -type d \( -name "test" -o -name "tests" \) -prune -exec rm -rf {} + \
@@ -49,6 +25,7 @@ RUN pip install --no-cache-dir --upgrade pip wheel setuptools==70.0.0 \
     && find "$VIRTUAL_ENV" -type f -name "*.pyo" -delete \
     && find "$VIRTUAL_ENV" -type f \( -name "*.pyi" -o -name "py.typed" \) -delete \
     && rm -rf "$VIRTUAL_ENV/lib/python3.11/site-packages/pip"* \
+    && rm -rf "$VIRTUAL_ENV/lib/python3.11/site-packages/wheel"* \
     && rm -rf /root/.cache/pip
 
 FROM python:3.11-slim-bookworm AS runtime
@@ -62,6 +39,15 @@ ENV PYTHONPATH=/app:/app/api
 WORKDIR /app/api
 
 COPY --from=builder /opt/venv /opt/venv
+
+RUN rm -rf /usr/local/lib/python3.11/site-packages/pip* \
+    && rm -rf /usr/local/lib/python3.11/site-packages/setuptools* \
+    && rm -rf /usr/local/lib/python3.11/site-packages/wheel* \
+    && rm -f /usr/local/bin/pip \
+    && rm -f /usr/local/bin/pip3 \
+    && rm -f /usr/local/bin/pip3.11 \
+    && rm -f /usr/local/bin/wheel
+
 COPY api/ /app/api/
 
 RUN adduser --disabled-password --gecos "" appuser
