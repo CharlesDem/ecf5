@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -7,8 +9,12 @@ from churnguard.evaluate import compute_metrics
 from churnguard.train import train_model
 
 
+TEST_DIR = Path(__file__).parent
+TEST_DATA_PATH = TEST_DIR / "data" / "telco_churn_test.csv"
+
+
 def test_train_model_returns_fitted_pipeline():
-    df = load_data("data/telco_churn.csv")
+    df = load_data(TEST_DATA_PATH)
 
     X, y = preprocess(df)
 
@@ -17,6 +23,7 @@ def test_train_model_returns_fitted_pipeline():
         y,
         "random_forest",
         {"n_estimators": 200, "max_depth": 10, "random_state": 42, "n_jobs": -1},
+        False,
     )
 
     assert isinstance(model, Pipeline)
@@ -35,7 +42,7 @@ def test_train_model_returns_fitted_pipeline():
 
 def test_compute_metrics_returns_expected_keys():
 
-    df = load_data("data/telco_churn_test.csv")
+    df = load_data(TEST_DATA_PATH)
 
     X, y = preprocess(df)
     _, X_test, _, y_test = train_test_split(
@@ -47,6 +54,7 @@ def test_compute_metrics_returns_expected_keys():
         y,
         "random_forest",
         {"n_estimators": 200, "max_depth": 10, "random_state": 42, "n_jobs": -1},
+        False,
     )
 
     metrics = compute_metrics(model, X_test, y_test)
