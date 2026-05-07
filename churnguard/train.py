@@ -15,7 +15,6 @@ from churnguard.evaluate import compute_metrics
 load_dotenv()
 
 
-
 PROD = "production"
 MLFLOW_TRACKING_URI = "http://mlflow:5000"
 EXPERIMENT_NAME = "churnguard"
@@ -24,30 +23,35 @@ MODEL_NAME = "churnguard-model"
 METRIC = "roc_auc"
 ARTIFACT_PATH = "model"
 
+
 def train_model(X, y, model_name: str, params: dict) -> Pipeline:
+    """Entraine le modele selon le type demandé et les params donnés, et log le tout dans mlflow"""
 
-    """ Entraine le modele selon le type demandé et les params donnés, et log le tout dans mlflow"""
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-
-    num_cols = ['tenure', 'MonthlyCharges', 'TotalCharges', 'SeniorCitizen']
+    num_cols = ["tenure", "MonthlyCharges", "TotalCharges", "SeniorCitizen"]
     cat_cols = [c for c in X.columns if c not in num_cols]
 
-    preprocess = ColumnTransformer([
-        ('num', StandardScaler(), num_cols),
-        ('cat', OneHotEncoder(handle_unknown='ignore'), cat_cols),
-    ])
+    preprocess = ColumnTransformer(
+        [
+            ("num", StandardScaler(), num_cols),
+            ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
+        ]
+    )
 
-    model = Pipeline([
-        ('prep', preprocess),
-        ('model', __set_model(model_name, params)),
-    ])
+    model = Pipeline(
+        [
+            ("prep", preprocess),
+            ("model", __set_model(model_name, params)),
+        ]
+    )
 
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
     mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "default"))
 
     with mlflow.start_run(run_name=model_name):
-        
         mlflow.log_param("model_name", model_name)
         mlflow.log_param("test_size", 0.2)
         mlflow.log_param("split_random_state", 42)
@@ -75,9 +79,9 @@ def train_model(X, y, model_name: str, params: dict) -> Pipeline:
 
     return model
 
-def promotion_to_laprod():
 
-    """ 
+def promotion_to_laprod():
+    """
     Promotion du meilleur model vers la prod :
             - on récupère l'experiment
             - on itère le modèle pour trouver le meilleur roc_aux
@@ -138,5 +142,6 @@ def __set_model(model_name: str, params: dict) -> BaseEstimator:
             return GradientBoostingClassifier(**params)
 
         case _:
-            raise ValueError(f"model non géré, choisissez [logistic_regression, random_forest, gradient_boosting]: {model_name}")
-
+            raise ValueError(
+                f"model non géré, choisissez [logistic_regression, random_forest, gradient_boosting]: {model_name}"
+            )

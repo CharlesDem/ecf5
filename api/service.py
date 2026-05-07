@@ -9,7 +9,6 @@ from models import CustomerFeatures, PredictionResponse
 
 
 class PredictionService:
-    
     def __init__(self) -> None:
         load_dotenv()
 
@@ -60,17 +59,18 @@ class PredictionService:
         while not self.load_model_once():
             time.sleep(self.retry_delay)
 
-
     def predict_customer(self, customer: CustomerFeatures) -> PredictionResponse:
         return self.predict_batch([customer])[0]
 
-    def predict_batch(self, customers: list[CustomerFeatures]) -> list[PredictionResponse]:
+    def predict_batch(
+        self, customers: list[CustomerFeatures]
+    ) -> list[PredictionResponse]:
         if self.model is None:
             raise ModelNotLoadedError()
 
-
-        df = pd.DataFrame([customer.model_dump() for customer in customers]) #TODO faudrait dégager pandas pour gagner du poids ?
-    
+        df = pd.DataFrame(
+            [customer.model_dump() for customer in customers]
+        )  # TODO faudrait dégager pandas pour gagner du poids ?
 
         model_impl = getattr(self.model, "_model_impl", None)
         sklearn_model = getattr(model_impl, "sklearn_model", self.model)

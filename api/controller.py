@@ -25,7 +25,7 @@ def health(request: Request) -> dict[str, str | None]:
 
     if prediction_service is None or prediction_service.model is None:
         return {
-            "status": "L'API n'est pas encore prête : aucun modèle avec l'alias production n'a été trouvé.", #TODO ajout url pour dire où promote un model
+            "status": "L'API n'est pas encore prête : aucun modèle avec l'alias production n'a été trouvé.",  # TODO ajout url pour dire où promote un model
             "model": "churnguard",
             "version": None,
         }

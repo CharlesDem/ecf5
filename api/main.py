@@ -3,15 +3,18 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from controller import router
-from error_handler import model_not_loaded_exception_handler, validation_exception_handler
+from error_handler import (
+    model_not_loaded_exception_handler,
+    validation_exception_handler,
+)
 from exceptions import ModelNotLoadedError
 from service import PredictionService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    prediction_service = PredictionService() 
-    prediction_service.load_model() # casse sans doute le async ici ?
+    prediction_service = PredictionService()
+    prediction_service.load_model()  # casse sans doute le async ici ?
     app.state.prediction_service = prediction_service
     yield
 
