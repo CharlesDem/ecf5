@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -12,8 +13,8 @@ from service import PredictionService
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    prediction_service = PredictionService()
-    prediction_service.load_model()
+    prediction_service = PredictionService() 
+    prediction_service.load_model() # casse sans doute le async ici ?
     app.state.prediction_service = prediction_service
     yield
 

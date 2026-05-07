@@ -1,0 +1,62 @@
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.13.0
+    container_name: mlflow
+    ports:
+      - "5000:5000"
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --serve-artifacts
+      --artifacts-destination /mlruns
+    volumes:
+      - mlflow-db:/mlflow
+      - mlflow-artifacts:/mlruns
+    networks:
+      - churnguard-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+
+  register-model:
+    build:
+      context: .
+      dockerfile: Dockerfile.register_model
+    container_name: churnguard-register-model
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    command: python scripts/register_model.py
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT_NAME: churnguard
+      MODEL_NAME: churnguard-model
+    restart: "no"
+    networks:
+      - churnguard-net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: churnguard-api
+    depends_on:
+      - mlflow
+    ports:
+      - "8000:8000"
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    networks:
+      - churnguard-net
+
+volumes:
+  mlflow-db:
+  mlflow-artifacts:
+
+networks:
+  churnguard-net:
