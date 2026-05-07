@@ -1,6 +1,6 @@
 import os
 import time
-
+import pandas as pd
 import mlflow
 from dotenv import load_dotenv
 
@@ -68,9 +68,9 @@ class PredictionService:
         if self.model is None:
             raise ModelNotLoadedError()
 
-        import pandas as pd
 
-        df = pd.DataFrame([customer.model_dump() for customer in customers])
+        df = pd.DataFrame([customer.model_dump() for customer in customers]) #TODO faudrait dégager pandas pour gagner du poids ?
+    
 
         model_impl = getattr(self.model, "_model_impl", None)
         sklearn_model = getattr(model_impl, "sklearn_model", self.model)
