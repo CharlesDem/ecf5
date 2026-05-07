@@ -248,6 +248,16 @@ Il exécute :
 - build Docker de l'image API
 - scan de sécurité avec Trivy
 
+### Alerting discord
+
+En cas d'échec de la CI, un message est envoyé sur discord (récupération d'un hook pré-existant)
+Le webhook est en secret dans Github.
+
+![discord alerter](docs/discord.png)
+
+
+![discord phone](docs/discord_telephone.jpg)
+
 
 ---
 
