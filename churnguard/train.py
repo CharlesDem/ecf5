@@ -48,7 +48,7 @@ def train_model(X, y, model_name: str, params: dict) -> Pipeline:
         ]
     )
 
-    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000"))
     mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "default"))
 
     with mlflow.start_run(run_name=model_name):
